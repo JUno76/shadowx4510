@@ -1,0 +1,32 @@
+Transfer File 2VM
+
+
+virtualBox 6.0.24 -- https://download.virtualbox.org/virtualbox/6.0.24/VirtualBox-6.0.24-139119-Win.exe
+
+download VMDK - https://drive.google.com/drive/u/0/folders/1me_nJJh0fvdDOXX3ew2jzGQpoP7f_iFt
+
+
+preference 
+
+Nat Network
+
+Create VM 
+
+disk manager - existing virtual disk - file choose VMDk
+
+start both VM
+
+ifconfig To check ip address of VM
+
+create file  --- touch transfer.txt
+
+open - nano transfer.txt  saveBy -  ctrl + X
+
+first check user in second copy -- ls /home
+
+by using SCP(secure Copy Protocol) we transfer file 
+
+scp transfer.txt vagrant@10.0.2.7:/home/vagrant
+
+
+
