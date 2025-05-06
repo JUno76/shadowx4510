@@ -1,0 +1,13 @@
+ git clone https://github.com/rajakrishna/react-appengine-demo
+
+
+
+ cd react-appengine-demo
+
+npm install
+
+npm run build
+
+gcloud app deploy
+
+gcloud app browse
