@@ -1,0 +1,62 @@
+Create HTTP server using Node JS
+
+
+ChatGPT said:
+Here's a simple example of how to create an HTTP server using Node.js — no external libraries needed (pure Node.js).
+
+✅ Step-by-Step: Create HTTP Server in Node.js
+📁 1. Create a file named server.js
+js
+Copy
+Edit
+// Load the built-in HTTP module
+const http = require('http');
+
+// Define the server port
+const PORT = 3000;
+
+// Create the server
+const server = http.createServer((req, res) => {
+  // Set HTTP headers
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+
+  // Send a response based on URL
+  if (req.url === '/') {
+    res.end('Welcome to the Home Page!');
+  } else if (req.url === '/about') {
+    res.end('This is the About Page.');
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('404 Not Found');
+  }
+});
+
+// Start listening
+server.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+🚀 How to Run
+Make sure Node.js is installed (node -v to check).
+
+Run the server:
+
+bash
+Copy
+Edit
+node server.js
+Open your browser and go to:
+
+http://localhost:3000/ → Home Page
+
+http://localhost:3000/about → About Page
+
+Any other path → 404
+
+✅ What You Learn
+http.createServer() creates a basic web server.
+
+req.url handles routing.
+
+res.writeHead() sets status and headers.
+
+res.end() sends the final response.

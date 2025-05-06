@@ -1,0 +1,131 @@
+Create a web page -  Login page using Angular FormsModule
+
+app.component.ts
+
+
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-root',
+  standalone: true, // 👈 Standalone component
+  imports: [CommonModule, FormsModule], // 👈 Required for ngModel, ngIf
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  user = {
+    email: '',
+    password: ''
+  };
+
+  onLogin() {
+    console.log('Login data:', this.user);
+    alert('Login successful!');
+  }
+}
+
+
+
+app.component.html
+
+<div class="container">
+  <form #loginForm="ngForm" (ngSubmit)="onLogin()" novalidate>
+    <h2>Login</h2>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        [(ngModel)]="user.email"
+        required
+        email
+        #email="ngModel"
+      />
+      <div class="error" *ngIf="email.invalid && email.touched">
+        Please enter a valid email.
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        [(ngModel)]="user.password"
+        required
+        minlength="6"
+        #password="ngModel"
+      />
+      <div class="error" *ngIf="password.invalid && password.touched">
+        Password must be at least 6 characters.
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="loginForm.invalid">Login</button>
+  </form>
+</div>
+
+
+app.component.css
+
+.container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
