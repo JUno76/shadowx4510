@@ -1,0 +1,333 @@
+✅ Step-by-Step: MongoDB Integration
+1. Install Required Packages
+Make sure these are installed:
+
+bash
+Copy
+Edit
+npm install express ejs passport passport-local express-session body-parser mongoose bcrypt
+2. Folder Structure
+pgsql
+Copy
+Edit
+passport-auth-app/
+│
+├── server.js
+├── models/
+│   └── User.js
+├── views/
+│   ├── login.ejs
+│   ├── register.ejs
+│   └── dashboard.ejs
+3. Code Files
+📁 models/User.js
+js
+Copy
+Edit
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  username: { type: String, unique: true, required: true },
+  password: { type: String, required: true }
+});
+
+module.exports = mongoose.model('User', userSchema);
+📄 server.js
+js
+Copy
+Edit
+const express = require('express');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const User = require('./models/User');
+
+const app = express();
+const PORT = 3000;
+
+// MongoDB Connection
+mongoose.connect('mongodb://127.0.0.1:27017/passportApp', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected'));
+
+// Middleware
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({ secret: 'secretkey', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport Config
+passport.use(new LocalStrategy(async (username, password, done) => {
+  const user = await User.findOne({ username });
+  if (!user) return done(null, false, { message: 'User not found' });
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return done(null, false, { message: 'Incorrect password' });
+
+  return done(null, user);
+}));
+
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findById(id);
+  done(null, user);
+});
+
+// Routes
+app.get('/', (req, res) => res.redirect('/login'));
+
+app.get('/login', (req, res) => res.render('login'));
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/dashboard',
+  failureRedirect: '/login'
+}));
+
+app.get('/register', (req, res) => res.render('register'));
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const user = new User({ username, password: hashedPassword });
+    await user.save();
+    res.redirect('/login');
+  } catch (e) {
+    res.send('Error creating user: ' + e.message);
+  }
+});
+
+app.get('/dashboard', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.render('dashboard', { user: req.user });
+  } else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.logout(() => res.redirect('/login'));
+});
+
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+🖼️ Views
+📄 views/login.ejs
+html
+Copy
+Edit
+<h2>Login</h2>
+<form method="POST" action="/login">
+  <input type="text" name="username" placeholder="Username" required /><br>
+  <input type="password" name="password" placeholder="Password" required /><br>
+  <button type="submit">Login</button>
+</form>
+<a href="/register">Register</a>
+📄 views/register.ejs
+html
+Copy
+Edit
+<h2>Register</h2>
+<form method="POST" action="/register">
+  <input type="text" name="username" placeholder="Username" required /><br>
+  <input type="password" name="password" placeholder="Password" required /><br>
+  <button type="submit">Register</button>
+</form>
+<a href="/login">Login</a>
+📄 views/dashboard.ejs
+html
+Copy
+Edit
+<h2>Welcome, <%= user.username %>!</h2>
+<a href="/logout">Logout</a>
+✅ Run Your App
+Start MongoDB (mongod)
+
+Start server:
+
+bash
+Copy
+Edit
+node server.js
+Open browser at: http://localhost:3000
+
+Do you want me to package this into a downloadable zip or GitHub repo format for you?
+
+
+
+
+
+
+
+You said:
+explain code
+
+
+ChatGPT said:
+Sure! Here's a detailed explanation of each part of the Passport.js + MongoDB authentication app:
+
+🔧 server.js – Main Application File
+✅ 1. Import Modules
+js
+Copy
+Edit
+const express = require('express');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const User = require('./models/User');
+Imports all the necessary libraries.
+
+User is the MongoDB model used to store and retrieve user data.
+
+✅ 2. MongoDB Connection
+js
+Copy
+Edit
+mongoose.connect('mongodb://127.0.0.1:27017/passportApp', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+Connects to the local MongoDB server.
+
+Database name is passportApp.
+
+✅ 3. Middleware Setup
+js
+Copy
+Edit
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({ secret: 'secretkey', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+Uses ejs for rendering views.
+
+Parses form data using body-parser.
+
+Sets up session handling.
+
+Initializes Passport for authentication.
+
+✅ 4. Passport Local Strategy
+js
+Copy
+Edit
+passport.use(new LocalStrategy(async (username, password, done) => {
+  const user = await User.findOne({ username });
+  if (!user) return done(null, false, { message: 'User not found' });
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return done(null, false, { message: 'Incorrect password' });
+
+  return done(null, user);
+}));
+Defines how users are authenticated using their username and password.
+
+Looks up the user in MongoDB.
+
+Uses bcrypt to compare hashed password.
+
+✅ 5. Passport Serialize/Deserialize
+js
+Copy
+Edit
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findById(id);
+  done(null, user);
+});
+serializeUser: stores user ID in the session.
+
+deserializeUser: retrieves full user object from DB using the stored ID.
+
+🔐 Authentication Routes
+✅ GET /login – Show Login Page
+js
+Copy
+Edit
+app.get('/login', (req, res) => res.render('login'));
+✅ POST /login – Handle Login
+js
+Copy
+Edit
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/dashboard',
+  failureRedirect: '/login'
+}));
+Uses Passport middleware to authenticate the user.
+
+Redirects on success/failure.
+
+✅ GET /register – Show Register Page
+js
+Copy
+Edit
+app.get('/register', (req, res) => res.render('register'));
+✅ POST /register – Create New User
+js
+Copy
+Edit
+const hashedPassword = await bcrypt.hash(password, 10);
+const user = new User({ username, password: hashedPassword });
+await user.save();
+Hashes the password with bcrypt.
+
+Saves the new user in MongoDB.
+
+✅ GET /dashboard – Protected Route
+js
+Copy
+Edit
+if (req.isAuthenticated()) {
+  res.render('dashboard', { user: req.user });
+} else {
+  res.redirect('/login');
+}
+Only allows access if the user is logged in.
+
+Displays username on the dashboard.
+
+✅ GET /logout – Logout User
+js
+Copy
+Edit
+req.logout(() => res.redirect('/login'));
+Ends the user session and redirects to login.
+
+🧾 models/User.js – MongoDB Schema
+js
+Copy
+Edit
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  username: { type: String, unique: true, required: true },
+  password: { type: String, required: true }
+});
+
+module.exports = mongoose.model('User', userSchema);
+Defines the structure for storing users in MongoDB.
+
+📄 views/*.ejs – HTML Pages
+login.ejs: form to enter username and password.
+
+register.ejs: form to create a new account.
+
+dashboard.ejs: greeting with the logged-in user’s name and a logout link.
+
+🟢 Summary:
+Passport handles authentication logic.
+
+MongoDB stores user data.
+
+bcrypt secures passwords.
+
+Sessions maintain login state across pages.
+
